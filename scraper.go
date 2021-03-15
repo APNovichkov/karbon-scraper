@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/chromedp/cdproto/cdp"
+	"github.com/chromedp/cdproto/runtime"
 	"github.com/chromedp/chromedp"
 	log "github.com/sirupsen/logrus"
 )
@@ -14,6 +15,7 @@ import (
 type Product struct {
 	ProductName string `json:"product_name"`
 	ProductURL string `json:"product_url"`
+	ProductImageUrl string `json:"product_image_url"`
 	InStorePrice string `json:"in_store_price"`
 	OriginalPrice string `json:"original_price"`
 	StoreName string `json:"store_name"`
@@ -50,7 +52,7 @@ func scrapeAce() []Product{
 
 	departments := []string{"tools"}
 	brands := []string{"dewalt"}
-	maxPageSize := 300
+	maxPageSize := 1000
 
 	aceUrl := fmt.Sprintf("https://www.acehardware.com/departments/%v/%v?pageSize=%v", departments[0], brands[0], maxPageSize)
 
@@ -66,6 +68,12 @@ func scrapeAce() []Product{
 	}
 	log.Info("Looking for Dewalt products in the tool deparment")
 
+	// Scroll to bottom
+	var res *runtime.RemoteObject
+	if err := chromedp.Run(ctx, chromedp.Evaluate(`window.scrollTo(0,document.body.scrollHeight);`, &res)); err != nil {
+		panic(err)
+	}
+	
 	// Look for product titles
 	var productTitles []*cdp.Node
 	if err := chromedp.Run(ctx, chromedp.Nodes(".mz-productlisting-title", &productTitles)); err != nil {
@@ -79,7 +87,7 @@ func scrapeAce() []Product{
 	}
 
 	var productImages []*cdp.Node
-	if err := chromedp.Run(ctx, chromedp.Nodes(".mz-productlisting-image", &productImages)); err != nil {
+	if err := chromedp.Run(ctx, chromedp.Nodes("a > img", &productImages)); err != nil {
 		panic("Error getting product images from ace store")
 	}
 
@@ -113,10 +121,10 @@ func scrapeAce() []Product{
 		// productLink := productTitles[i].AttributeValue("href")
 		// productPrice := productTitles[i]
 
-		fmt.Printf("Found product title #%v: %v\n", i, productName)
-		fmt.Printf("Found product image: #%v, %v\n", i, productImage)
-		fmt.Printf("Found product url #%v: %v\n", i, productURL)
-		fmt.Printf("Found product price #%v: %v\n", i, productPrice)
+		// fmt.Printf("Found product title #%v: %v\n", i, productName)
+		// fmt.Printf("Found product image: #%v, %v\n", i, productImage)
+		// fmt.Printf("Found product url #%v: %v\n", i, productURL)
+		// fmt.Printf("Found product price #%v: %v\n", i, productPrice)
 		// fmt.Println("------")
 
 		newProduct := Product{
@@ -127,6 +135,7 @@ func scrapeAce() []Product{
 			StoreCoordinates: storeCoordinates,
 			ProductName: productName,
 			ProductURL: productURL,
+			ProductImageUrl: productImage,
 			InStorePrice: productPrice,
 			OriginalPrice: productPrice,
 		}
