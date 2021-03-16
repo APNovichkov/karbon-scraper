@@ -46,7 +46,7 @@ func RunScraper() []Product{
 	}()
 
 	// Read in items from channel
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 1000000; i++ {
         select {
         case product, ok := <- productsChan:
             if !ok {
@@ -88,7 +88,7 @@ func scrapeAce(wg *sync.WaitGroup, productsChan chan Product) {
 		// create context
 		log.Info(fmt.Sprintf("Initializing Context for Ace Scraper: %v", aceUrl))
 		ctx, cancel := chromedp.NewContext(context.Background())
-		ctx, cancel = context.WithTimeout(ctx, 15*time.Second)
+		ctx, cancel = context.WithTimeout(ctx, 1*time.Hour)
 		defer cancel()
 
 		// Navigate to page
@@ -156,69 +156,87 @@ func scrapeCvs(wg *sync.WaitGroup, productsChan chan Product) {
 	closingHour := "Open 24 Hours"
 
 	dataPoints := map[string][]string {
-		"household": {"household"},
+		"categories": {"household", "personal-care"},
 	}
 
-	for _, searchKey := range(dataPoints["household"]) {
+	for _, searchKey := range(dataPoints["categories"]) {
 
-		cvsUrl := fmt.Sprintf("https://www.cvs.com/shop/%v?icid=cvsheader:shop", searchKey)
-		
-		// Initialize Context
-		log.Info(fmt.Sprintf("Initializing Context for %v", cvsUrl))
-		ctx, cancel := chromedp.NewContext(context.Background())
-		ctx, cancel = context.WithTimeout(ctx, 15 * time.Second)
-		defer cancel()
+		maxPageNum := 100
 
-		// Navigate to page
-		if err := chromedp.Run(ctx, chromedp.Navigate(cvsUrl)); err != nil {
-			panic("Could not navigate to cvsUrl")
-		}
+		for i := 0; i < maxPageNum; i++ {
+			// Initialize Context
+			log.Info("Initializing Context for CVS")
+			ctx, cancel := chromedp.NewContext(context.Background())
+			ctx, cancel = context.WithTimeout(ctx, 6*time.Second)
+			defer cancel()
 
-		// Look for product data
-		var productTitles []*cdp.Node
-		var productPrices []*cdp.Node
-		var productUrls []*cdp.Node
-		// var productImages []*cdp.Node
-		// var productItems []*cdp.Node
-		if err := chromedp.Run(ctx, chromedp.Nodes(".r-ubezar", &productTitles), 
-									chromedp.Nodes(".r-ttdzmv", &productPrices),
-									chromedp.Nodes(".r-1lz4bg0", &productUrls)); err != nil {
-										panic(err)
-									}
-		
-        log.Info(fmt.Sprintf("Found %v Product Tiles", len(productTitles)))
-		log.Info(fmt.Sprintf("Found %v Product Prices", len(productPrices)))
-		log.Info(fmt.Sprintf("Found %v Product Urls", len(productUrls)))
-
-		// Have to start at 2 because of inconsistency in the loaded page
-		for i := 2; i < len(productTitles); i++ {
-			productName := strings.TrimSpace(productTitles[i].Children[0].NodeValue)
-			productPrice := formatPrice(strings.TrimSpace(productPrices[i-1].Children[0].NodeValue))
-			productURL := fmt.Sprintf("https://www.cvs.com%v", strings.TrimSpace(productUrls[i-1].AttributeValue("href")))
-
-
-			fmt.Printf("Product Title #%v: %v\n", i, productTitles[i].Children[0].NodeValue)
-			fmt.Printf("Product Price #%v: %v\n", i, productPrices[i-1].Children[0].NodeValue)
-			fmt.Printf("Product Url #%v: https://www.cvs.com%v\n", i, productUrls[i-1].AttributeValue("href"))
-			fmt.Println("------------------------------------")
-
-			newProduct := Product{
-				StoreName: storeName,
-				ClosingHour: closingHour,
-				PhoneNumber: phoneNumber,
-				Address: address,
-				StoreCoordinates: storeCoordinates,
-				ProductName: productName,
-				ProductURL: productURL,
-				ProductImageUrl: "productImageHere",
-				InStorePrice: productPrice,
-				OriginalPrice: productPrice,
+			cvsUrl := fmt.Sprintf("https://www.cvs.com/shop/%v?page=%v", searchKey, i+1)	
+			
+			log.Info(fmt.Sprintf("Set url for page #%v: %v", i+1, cvsUrl))
+	
+			// Navigate to page
+			if err := chromedp.Run(ctx, chromedp.Navigate(cvsUrl)); err != nil {
+				fmt.Println("Could not navigate to cvsUrl, continuing to the next page")
+				continue
 			}
 
-			productsChan <- newProduct
-		}
+			// TODO - Try clicking load more instead of navigating to different pages to see if that works
 
-		
+			// time.Sleep(3*time.Second)
+
+			// log.Info("Waiting for product data to become visible")
+			// if err := chromedp.Run(ctx, chromedp.WaitVisible(".r-ttdzmv", chromedp.ByQuery)); err != nil {
+			// 	fmt.Println("Wait visible did not work")
+			// 	continue
+			// }
+			
+
+			log.Info("Looking for product data")
+			// Look for product data
+			var productTitles []*cdp.Node
+			var productPrices []*cdp.Node
+			var productUrls []*cdp.Node
+			// var productImages []*cdp.Node
+			// var productItems []*cdp.Node
+			if err := chromedp.Run(ctx, chromedp.Nodes(".r-ubezar", &productTitles), 
+										chromedp.Nodes(".r-ttdzmv", &productPrices),
+										chromedp.Nodes(".r-1lz4bg0", &productUrls)); err != nil {
+											fmt.Println("Timed out, continuing onto the next page")
+											continue 
+										}
+			
+			log.Info(fmt.Sprintf("Found %v Product Tiles", len(productTitles)))
+			log.Info(fmt.Sprintf("Found %v Product Prices", len(productPrices)))
+			log.Info(fmt.Sprintf("Found %v Product Urls", len(productUrls)))
+	
+			// Have to start at 2 because of inconsistency in the loaded page
+			for i := 2; i < len(productTitles); i++ {
+				productName := strings.TrimSpace(productTitles[i].Children[0].NodeValue)
+				productPrice := formatPrice(strings.TrimSpace(productPrices[i-1].Children[0].NodeValue))
+				productURL := fmt.Sprintf("https://www.cvs.com%v", strings.TrimSpace(productUrls[i-1].AttributeValue("href")))
+	
+	
+				fmt.Printf("Product Title #%v: %v\n", i, productTitles[i].Children[0].NodeValue)
+				fmt.Printf("Product Price #%v: %v\n", i, productPrices[i-1].Children[0].NodeValue)
+				fmt.Printf("Product Url #%v: https://www.cvs.com%v\n", i, productUrls[i-1].AttributeValue("href"))
+				fmt.Println("------------------------------------")
+	
+				newProduct := Product{
+					StoreName: storeName,
+					ClosingHour: closingHour,
+					PhoneNumber: phoneNumber,
+					Address: address,
+					StoreCoordinates: storeCoordinates,
+					ProductName: productName,
+					ProductURL: productURL,
+					ProductImageUrl: "productImageHere",
+					InStorePrice: productPrice,
+					OriginalPrice: productPrice,
+				}
+	
+				productsChan <- newProduct
+			}
+		}
 	}		
 }
 
