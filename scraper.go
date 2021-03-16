@@ -75,14 +75,15 @@ func scrapeAce(wg *sync.WaitGroup, productsChan chan Product) []Product{
 
 	dataPoints := map[string][]string{
 		"tools": {"dewalt", "craftsman", "milwaukee"},
+		"lighting-and-electrical": {"light-bulbs", "batteries", "circuit-breakers-fuses-and-panels", "electrical-tools", "wire", "home-electronics"},
 	}
 
-	for _, searchKey := range(dataPoints["tools"]) {
+	for _, searchKey := range(dataPoints["lighting-and-electrical"]) {
 		
 		// TODO - Figure out best way to do this!
 		maxPageSize := 300
 
-		aceUrl := fmt.Sprintf("https://www.acehardware.com/departments/%v/%v?pageSize=%v", "tools", searchKey, maxPageSize)
+		aceUrl := fmt.Sprintf("https://www.acehardware.com/departments/%v/%v?pageSize=%v", "lighting-and-electrical", searchKey, maxPageSize)
 
 		// create context
 		log.Info(fmt.Sprintf("Initializing Context for Ace Scraper: %v", aceUrl))
