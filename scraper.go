@@ -34,8 +34,10 @@ func RunScraper() []Product{
 	productsChan := make(chan Product, 1000000)
 
 	// Run Ace Scraper
+	// wg.Add(1)
+	// go scrapeAce(&wg, productsChan);
 	wg.Add(1)
-	go scrapeAce(&wg, productsChan);
+	go scrapeCvs(&wg, productsChan);
 
 	// Defer closing of channel until waitgroup is clear
 	go func() {
@@ -61,10 +63,8 @@ func RunScraper() []Product{
 }
 
 
-func scrapeAce(wg *sync.WaitGroup, productsChan chan Product) []Product{
+func scrapeAce(wg *sync.WaitGroup, productsChan chan Product) {
 	defer wg.Done()
-
-	aceProducts := []Product{}
 
 	// Constants
 	storeName := "Ace Hardware"
@@ -143,12 +143,83 @@ func scrapeAce(wg *sync.WaitGroup, productsChan chan Product) []Product{
 			productsChan <- newProduct
 		}
 	}
-
-	return aceProducts
 }
 
-func scrapeCvs() {
-	log.Info("Starting to scrape CVS")
+func scrapeCvs(wg *sync.WaitGroup, productsChan chan Product) {
+	defer wg.Done()
+
+	// Constants
+	storeName := "CVS Pharmacy"
+	phoneNumber := "(925) 933-8353"
+	address := "1123 S California Blvd, Walnut Creek, CA 94596"
+	storeCoordinates := []float32{37.89759212473446, -122.06905777332277}
+	closingHour := "Open 24 Hours"
+
+	dataPoints := map[string][]string {
+		"household": {"household"},
+	}
+
+	for _, searchKey := range(dataPoints["household"]) {
+
+		cvsUrl := fmt.Sprintf("https://www.cvs.com/shop/%v?icid=cvsheader:shop", searchKey)
+		
+		// Initialize Context
+		log.Info(fmt.Sprintf("Initializing Context for %v", cvsUrl))
+		ctx, cancel := chromedp.NewContext(context.Background())
+		ctx, cancel = context.WithTimeout(ctx, 15 * time.Second)
+		defer cancel()
+
+		// Navigate to page
+		if err := chromedp.Run(ctx, chromedp.Navigate(cvsUrl)); err != nil {
+			panic("Could not navigate to cvsUrl")
+		}
+
+		// Look for product data
+		var productTitles []*cdp.Node
+		var productPrices []*cdp.Node
+		var productUrls []*cdp.Node
+		// var productImages []*cdp.Node
+		// var productItems []*cdp.Node
+		if err := chromedp.Run(ctx, chromedp.Nodes(".r-ubezar", &productTitles), 
+									chromedp.Nodes(".r-ttdzmv", &productPrices),
+									chromedp.Nodes(".r-1lz4bg0", &productUrls)); err != nil {
+										panic(err)
+									}
+		
+        log.Info(fmt.Sprintf("Found %v Product Tiles", len(productTitles)))
+		log.Info(fmt.Sprintf("Found %v Product Prices", len(productPrices)))
+		log.Info(fmt.Sprintf("Found %v Product Urls", len(productUrls)))
+
+		// Have to start at 2 because of inconsistency in the loaded page
+		for i := 2; i < len(productTitles); i++ {
+			productName := strings.TrimSpace(productTitles[i].Children[0].NodeValue)
+			productPrice := formatPrice(strings.TrimSpace(productPrices[i-1].Children[0].NodeValue))
+			productURL := fmt.Sprintf("https://www.cvs.com%v", strings.TrimSpace(productUrls[i-1].AttributeValue("href")))
+
+
+			fmt.Printf("Product Title #%v: %v\n", i, productTitles[i].Children[0].NodeValue)
+			fmt.Printf("Product Price #%v: %v\n", i, productPrices[i-1].Children[0].NodeValue)
+			fmt.Printf("Product Url #%v: https://www.cvs.com%v\n", i, productUrls[i-1].AttributeValue("href"))
+			fmt.Println("------------------------------------")
+
+			newProduct := Product{
+				StoreName: storeName,
+				ClosingHour: closingHour,
+				PhoneNumber: phoneNumber,
+				Address: address,
+				StoreCoordinates: storeCoordinates,
+				ProductName: productName,
+				ProductURL: productURL,
+				ProductImageUrl: "productImageHere",
+				InStorePrice: productPrice,
+				OriginalPrice: productPrice,
+			}
+
+			productsChan <- newProduct
+		}
+
+		
+	}		
 }
 
 func formatPrice(price string) float64{
