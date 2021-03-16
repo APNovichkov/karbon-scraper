@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -16,8 +17,8 @@ type Product struct {
 	ProductName string `json:"product_name"`
 	ProductURL string `json:"product_url"`
 	ProductImageUrl string `json:"product_image_url"`
-	InStorePrice string `json:"in_store_price"`
-	OriginalPrice string `json:"original_price"`
+	InStorePrice float64 `json:"in_store_price"`
+	OriginalPrice float64 `json:"original_price"`
 	StoreName string `json:"store_name"`
 	PhoneNumber string `json:"phone_number"`
 	Address string `json:"address"`
@@ -84,7 +85,7 @@ func scrapeAce(wg *sync.WaitGroup, productsChan chan Product) []Product{
 		aceUrl := fmt.Sprintf("https://www.acehardware.com/departments/%v/%v?pageSize=%v", "tools", searchKey, maxPageSize)
 
 		// create context
-		log.Info("Initializing Context for Ace Scraper")
+		log.Info(fmt.Sprintf("Initializing Context for Ace Scraper: %v", aceUrl))
 		ctx, cancel := chromedp.NewContext(context.Background())
 		ctx, cancel = context.WithTimeout(ctx, 15*time.Second)
 		defer cancel()
@@ -116,7 +117,7 @@ func scrapeAce(wg *sync.WaitGroup, productsChan chan Product) []Product{
 			productImage := fmt.Sprintf("https:%v", strings.TrimSpace(productItems[i].Children[1].Children[0].Children[0].AttributeValue("src")))
 			productURL := strings.TrimSpace(productItems[i].Children[2].Children[0].AttributeValue("href")) 
 			productName := strings.TrimSpace(productItems[i].Children[2].Children[0].Children[0].NodeValue)
-			productPrice:= strings.TrimSpace(productItems[i].Children[2].Children[3].Children[1].Children[0].NodeValue)
+			productPrice:= formatPrice(strings.TrimSpace(productItems[i].Children[2].Children[3].Children[1].Children[0].NodeValue))
 			
 
 			fmt.Printf("Found product title #%v: %v\n", i, productName)
@@ -147,6 +148,23 @@ func scrapeAce(wg *sync.WaitGroup, productsChan chan Product) []Product{
 
 func scrapeCvs() {
 	log.Info("Starting to scrape CVS")
+}
+
+func formatPrice(price string) float64{
+	if strings.Contains(price, "$") {
+		floatPrice, err := strconv.ParseFloat(price[1:], 64)
+		if err != nil {
+			panic(err)
+		}
+		return float64(int(floatPrice * 100)) / 100 
+	}
+
+	floatPrice, err := strconv.ParseFloat(price, 32)
+	if err != nil {
+		panic(err)
+	}
+	
+	return float64(int(floatPrice * 100)) / 100
 }
 
 
