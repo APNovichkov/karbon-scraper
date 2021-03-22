@@ -1,0 +1,62 @@
+[
+  {
+    "product_name": "DeWalt 12 in. Corded Single-Bevel Compound Miter Saw 15 amps 4000 rpm",
+    "product_url": "https://www.acehardware.com/departments/tools/power-tools/miter-saws/2161974",
+    "product_image_url": "https://cdn-tp3.mozu.com/24645-37138/resources/images/placeholder-white.jpg",
+    "in_store_price": 229.99,
+    "original_price": 229.99,
+    "store_name": "Ace Hardware",
+    "phone_number": "(925) 705-7500",
+    "address": "2044 Mt Diablo Blvd Walnut Creek, CA 94596",
+    "store_coordinates": {
+      "lat": 37.89759,
+      "lon": -122.06906
+    },
+    "closing_hour": "19:00"
+  },
+  {
+    "product_name": "DeWalt Rapid Load Carbide Masonry Drill Bit Set 7 pc.",
+    "product_url": "https://www.acehardware.com/departments/tools/power-tool-accessories/drill-bits/2364891",
+    "product_image_url": "https://cdn-tp3.mozu.com/24645-37138/resources/images/placeholder-white.jpg",
+    "in_store_price": 25.99,
+    "original_price": 25.99,
+    "store_name": "Ace Hardware",
+    "phone_number": "(925) 705-7500",
+    "address": "2044 Mt Diablo Blvd Walnut Creek, CA 94596",
+    "store_coordinates": {
+      "lat": 37.89759,
+      "lon": -122.06906
+    },
+    "closing_hour": "19:00"
+  },
+  {
+    "product_name": "Bulldog Original Bamboo Razor, 1 CT, 2 Refill",
+    "product_url": "https://www.cvs.com/shop/bulldog-original-bamboo-razor-1-ct-2-refill-prodid-2270264",
+    "product_image_url": "productImageHere",
+    "in_store_price": 11.99,
+    "original_price": 11.99,
+    "store_name": "CVS Pharmacy",
+    "phone_number": "(925) 933-8353",
+    "address": "1123 S California Blvd, Walnut Creek, CA 94596",
+    "store_coordinates": {
+      "lat": 37.896473,
+      "lon": -122.06447
+    },
+    "closing_hour": "Open 24 hours"
+  },
+  {
+    "product_name": "Schick Hydro Silk Perfect Finish Trimmer, 8-in-1 Grooming Kit",
+    "product_url": "https://www.cvs.com/shop/schick-hydro-silk-perfect-finish-trimmer-8-in-1-grooming-kit-prodid-2600192",
+    "product_image_url": "productImageHere",
+    "in_store_price": 19.98,
+    "original_price": 19.98,
+    "store_name": "CVS Pharmacy",
+    "phone_number": "(925) 933-8353",
+    "address": "1123 S California Blvd, Walnut Creek, CA 94596",
+    "store_coordinates": {
+      "lat": 37.896473,
+      "lon": -122.06447
+    },
+    "closing_hour": "Open 24 hours"
+  }
+]

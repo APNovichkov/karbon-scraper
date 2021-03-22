@@ -1,0 +1,17 @@
+[
+    {
+        "product_name": "Bulldog Original Bamboo Razor, 1 CT, 2 Refill",
+        "product_url": "https://www.cvs.com/shop/bulldog-original-bamboo-razor-1-ct-2-refill-prodid-2270264",
+        "product_image_url": "productImageHere",
+        "in_store_price": 11.99,
+        "original_price": 11.99,
+        "store_name": "CVS Pharmacy",
+        "phone_number": "(925) 933-8353",
+        "address": "1123 S California Blvd, Walnut Creek, CA 94596",
+        "store_coordinates": [
+            -122.06447,
+            37.896473
+        ],
+        "closing_hour": "Open 24 hours"
+    }
+]
