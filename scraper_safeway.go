@@ -83,7 +83,7 @@ func ScrapeSafeway(productsChan chan Product) {
 						// fmt.Printf("Card price child at card #%v -> %v\n", i+1, len(productCards[i].Children[0].Children)) 
 
 						if len(productCards[i].Children[0].Children) == 0{
-							fmt.Printf("%v does not have a price (out of stock!)\n", productTitles[i].Children[0].NodeValue )
+							log.Warn("%v does not have a price (out of stock!)\n", productTitles[i].Children[0].NodeValue )
 							continue
 						}
 
@@ -93,7 +93,9 @@ func ScrapeSafeway(productsChan chan Product) {
 
 						var productPrice string
 						if err := chromedp.Run(ctx, chromedp.Text(fmt.Sprintf("#%v", productPriceId), &productPrice)); err != nil {
-							panic("Could not find price for product")
+							log.Error("Could not find price for product")
+							priceIndex ++
+							continue
 						}
 						
 						newProduct := Product{

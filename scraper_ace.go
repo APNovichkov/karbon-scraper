@@ -110,4 +110,6 @@ func ScrapeAce(productsChan chan Product) {
 	localWg.Wait()
 	
 	log.Info("Finished Scraping ACE")
+
+	close(productsChan)
 }
