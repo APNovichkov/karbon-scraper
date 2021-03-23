@@ -3,7 +3,6 @@ package main
 import (
 	"strconv"
 	"strings"
-	"sync"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -24,21 +23,14 @@ type Product struct {
 func RunScraper() []Product{
 	log.Info("Running Scraper Module")
 
-	wg := sync.WaitGroup{}
 	allProducts := []Product{}
 	productsChan := make(chan Product, 1000000)
-
+	// defer close(productsChan)
+	
 	// Run Ace Scraper
-	wg.Add(1)
-	go ScrapeAce(&wg, productsChan);
-	wg.Add(1)
-	go ScrapeCvs(&wg, productsChan);
-
-	// Defer closing of channel until waitgroup is clear
-	go func() {
-		defer close(productsChan)
-        wg.Wait()
-	}()
+	// ScrapeAce(productsChan);
+	// ScrapeCvs(productsChan);
+	ScrapeSafeway(productsChan);
 
 	// Read in items from channel
 	for i := 0; i < 1000000; i++ {

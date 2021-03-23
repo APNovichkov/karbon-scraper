@@ -12,9 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func ScrapeCvs(wg *sync.WaitGroup, productsChan chan Product) {
-	defer wg.Done()
-
+func ScrapeCvs(productsChan chan Product) {
 	// Constants
 	storeName := "CVS Pharmacy"
 	phoneNumber := "(925) 933-8353"
@@ -117,4 +115,6 @@ func ScrapeCvs(wg *sync.WaitGroup, productsChan chan Product) {
 	localWg.Wait()
 
 	log.Info("Done scraping CVS website")
+
+	close(productsChan)
 }

@@ -12,9 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func ScrapeAce(wg *sync.WaitGroup, productsChan chan Product) {
-	defer wg.Done()
-
+func ScrapeAce(productsChan chan Product) {
 	// Constants
 	storeName := "Ace Hardware"
 	phoneNumber := "(925) 705-7500"
@@ -55,7 +53,8 @@ func ScrapeAce(wg *sync.WaitGroup, productsChan chan Product) {
 		
 				// Navigate to page
 				if err := chromedp.Run(ctx, chromedp.Navigate(aceUrl)); err != nil {
-					panic("Error navigating to ACE url")
+					log.Error(fmt.Sprintf("Error navigating to ACE url: %v"), aceUrl)
+					return
 				}
 		
 				// Look for product data
