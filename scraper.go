@@ -28,8 +28,8 @@ func RunScraper() []Product{
 	// defer close(productsChan)
 	
 	// Run Ace Scraper
-	// ScrapeAce(productsChan);
-	// ScrapeCvs(productsChan);
+	ScrapeAce(productsChan);
+	ScrapeCvs(productsChan);
 	ScrapeSafeway(productsChan);
 
 	// Read in items from channel

@@ -115,6 +115,4 @@ func ScrapeCvs(productsChan chan Product) {
 	localWg.Wait()
 
 	log.Info("Done scraping CVS website")
-
-	close(productsChan)
 }
