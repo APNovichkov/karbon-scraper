@@ -18,6 +18,7 @@ func ScrapeCvs(productsChan chan Product) {
 	phoneNumber := "(925) 933-8353"
 	address := "1123 S California Blvd, Walnut Creek, CA 94596"
 	storeCoordinates := []float32{-122.06446582963069, 37.896474574278315}
+	storeCoordinatesString := []float32{37.896474574278315, -122.06446582963069}
 	closingHour := "Open 24 hours"
 
 	dataPoints := map[string][]string {
@@ -98,6 +99,7 @@ func ScrapeCvs(productsChan chan Product) {
 							PhoneNumber: phoneNumber,
 							Address: address,
 							StoreCoordinates: storeCoordinates,
+							StoreCoordinatesString: storeCoordinatesString,
 							ProductName: productName,
 							ProductURL: productURL,
 							ProductImageUrl: "productImageHere",
@@ -116,5 +118,5 @@ func ScrapeCvs(productsChan chan Product) {
 
 	log.Info("Done scraping CVS website")
 
-	close(productsChan)
+	// close(productsChan)
 }

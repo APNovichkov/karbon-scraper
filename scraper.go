@@ -17,6 +17,7 @@ type Product struct {
 	PhoneNumber string `json:"phone_number"`
 	Address string `json:"address"`
 	StoreCoordinates []float32 `json:"store_coordinates"`
+	StoreCoordinatesString []float32 `json:"store_coordinates_string"`
 	ClosingHour string `json:"closing_hour"`
 }
 
@@ -25,12 +26,11 @@ func RunScraper() []Product{
 
 	allProducts := []Product{}
 	productsChan := make(chan Product, 1000000)
-	// defer close(productsChan)
 	
 	// Run Ace Scraper
-	// ScrapeAce(productsChan);
+	ScrapeAce(productsChan);
 	ScrapeCvs(productsChan);
-	// ScrapeSafeway(productsChan);
+	ScrapeSafeway(productsChan);
 
 	// Read in items from channel
 	for i := 0; i < 1000000; i++ {

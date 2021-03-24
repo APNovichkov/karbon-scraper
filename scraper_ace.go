@@ -18,6 +18,7 @@ func ScrapeAce(productsChan chan Product) {
 	phoneNumber := "(925) 705-7500"
 	address := "2044 Mt Diablo Blvd Walnut Creek, CA 94596"
 	storeCoordinates := []float32{-122.06905777332277, 37.89759212473446}
+	storeCoordinatesString := []float32{37.89759212473446, -122.06905777332277}
 	closingHour := "19:00"
 
 	localWg := sync.WaitGroup{}
@@ -95,6 +96,7 @@ func ScrapeAce(productsChan chan Product) {
 						PhoneNumber: phoneNumber,
 						Address: address,
 						StoreCoordinates: storeCoordinates,
+						StoreCoordinatesString: storeCoordinatesString,
 						ProductName: productName,
 						ProductURL: productURL,
 						ProductImageUrl: productImage,
@@ -111,5 +113,5 @@ func ScrapeAce(productsChan chan Product) {
 	
 	log.Info("Finished Scraping ACE")
 
-	close(productsChan)
+	// close(productsChan)
 }

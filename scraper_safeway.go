@@ -19,6 +19,7 @@ func ScrapeSafeway(productsChan chan Product) {
 	phoneNumber := "(925) 935-9205"
 	address := "600 S Broadway, Walnut Creek, CA 94596"
 	storeCoordinates := []float32{-122.05669815449866, 37.898100097265385}
+	storeCoordinatesString := []float32{37.898100097265385, -122.05669815449866}
 	closingHour := "23:00"
 
 	dataPoints := map[string][]string {
@@ -104,6 +105,7 @@ func ScrapeSafeway(productsChan chan Product) {
 							PhoneNumber: phoneNumber,
 							Address: address,
 							StoreCoordinates: storeCoordinates,
+							StoreCoordinatesString: storeCoordinatesString,
 							ProductName: productName,
 							ProductURL: productURL,
 							ProductImageUrl: "productImageHere",
